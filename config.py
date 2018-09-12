@@ -1,11 +1,9 @@
 import yaml
 import os
 import os.path
-import sys
 
-def load_config(config_name):
-    config_path="./configs/{}.yml".format(config_name)
-    with open(config_path, 'r') as stream:
+def load_config(config_file):
+    with open(config_file) as stream:
         try:
             CONFIG = yaml.load(stream)
         except Exception as e:
@@ -15,11 +13,8 @@ def load_config(config_name):
         #[section, type, error message]
         sections = [["token", str, "Section `token` must be a string wrapped in quotes."],
                     ["url", str, "Section `url` must be a string wrapped in quotes."],
-                    ["good_luck_messages", list, "Chat messages on beginning of game."],
-                    ["good_game_message", str, "Chat message on finishing game."],
                     ["engine", dict, "Section `engine` must be a dictionary with indented keys followed by colons.."],
-                    ["challenge", dict, "Section `challenge` must be a dictionary with indented keys followed by colons.."],
-                    ["max_concurrent_games", int, "Section `max_concurrent_games` must be an integer number without quotes."]]
+                    ["challenge", dict, "Section `challenge` must be a dictionary with indented keys followed by colons.."]]
         for section in sections:
             if section[0] not in CONFIG:
                 raise Exception("Your config.yml does not have required section `{}`.".format(section[0]))
@@ -28,7 +23,6 @@ def load_config(config_name):
 
         engine_sections = [["dir", str, "´dir´ must be a string wrapped in quotes."],
                            ["name", str, "´name´ must be a string wrapped in quotes."]]
-
         for subsection in engine_sections:
             if subsection[0] not in CONFIG["engine"]:
                 raise Exception("Your config.yml does not have required `engine` subsection `{}`.".format(subsection))
@@ -48,15 +42,5 @@ def load_config(config_name):
 
         if not os.access(engine, os.X_OK):
             raise Exception("The engine %s doesn't have execute (x) permission. Try: chmod +x %s" % (engine, engine))
-
-        if "polyglot" in CONFIG["engine"] and CONFIG["engine"]["polyglot"]["enabled"] is True:
-            book_paths=[]
-            for book_name in CONFIG["engine"]["polyglot"]["books"]:
-                book_dir = os.path.join(CONFIG["engine"]["dir"], book_name)
-                if not os.path.isfile(book_dir):
-                    raise Exception("The polyglot book %s file does not exist." % book_dir)
-                book_paths.append(book_dir)
-
-            CONFIG["engine"]["polyglot"]["books"] = book_paths
 
     return CONFIG
