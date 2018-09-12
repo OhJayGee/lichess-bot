@@ -29,6 +29,9 @@ class Challenge():
     def is_supported(self, config):
         if not config.get("accept_bot", False) and self.challenger_is_bot:
             return False
+        c_elo = config.get("min_ELO", 2000)
+        if c_elo > self.challenger_rating_int:
+            return False
         variants = config["variants"]
         tc = config["time_controls"]
         modes = config["modes"]
@@ -56,7 +59,7 @@ class Game():
         self.username = username
         self.id = json.get("id")
         self.speed = json.get("speed")
-        clock = json.get("clock", {})
+        clock = json.get("clock", {}) or {}
         self.clock_initial = clock.get("initial", 1000 * 3600 * 24 * 365 * 10) # unlimited = 10 years
         self.clock_increment = clock.get("increment", 0)
         self.perf_name = json.get("perf").get("name") if json.get("perf") else "{perf?}"
@@ -86,6 +89,9 @@ class Game():
 
     def should_abort_now(self):
         return self.is_abortable() and time.time() > self.abort_at
+
+    def my_remaining_seconds(self):
+        return (self.state["wtime"] if self.is_white else self.state["btime"]) / 1000
 
     def __str__(self):
         return "{} {} vs {}".format(self.url(), self.perf_name, self.opponent.__str__())
