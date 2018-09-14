@@ -29,7 +29,7 @@ class Challenge():
     def is_supported(self, config):
         if not config.get("accept_bot", False) and self.challenger_is_bot:
             return False
-        c_elo = config.get("min_ELO", 2000)
+        c_elo = config.get("min_ELO", 2200)
         if c_elo > self.challenger_rating_int:
             return False
         variants = config["variants"]
